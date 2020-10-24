@@ -49,12 +49,12 @@ $ ip addr | grep eno1 | grep inet | awk {'print $2'}
 
 Note we can stream the content on Google home
 
-### Make your stream availble publicly
+### Make your stream available publicly
 
 Use-case: phone with 3G while not at home
 
 
-As a prerequisute you need to configure a Dynamic DNS.
+As a prerequisite you need to configure a Dynamic DNS.
 Procedure is described here: https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-a.md#configure-a-dynamic-dns
 
 - Configure NAT on your box
@@ -160,8 +160,38 @@ ytdl https://www.youtube.com/watch?v=ddjTNiCKBBU https://www.youtube.com/watch?v
 - Play MP3 wiht Jupyter: https://stackoverflow.com/questions/33417151/playing-mp3-in-a-folder-with-jupyter-notebook
 - Use HTML5 music player: https://github.com/MoePlayer/APlayer
 
-#### TODO
+### Misc notes
 
+#### Music stopping at end of each track
+
+We should check the `no-loop` option.
+
+**Source**: https://superuser.com/questions/1304188/how-to-prevent-automatic-jumping-to-next-track#:~:text=With%20VLC%20you%20can%20stop,no%2Dloop%20option%20is%20selected
+
+
+#### Start server
+
+Before run we need to start VLC server.
+It could be started remotely via Jupyter or SSH (NAT again).
+Cf. https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-a.md
+
+
+#### CNAME to DDNS (advanced)
+
+When we use dynamic DNS `scoulomb.ddns.net:20001`, we could use `home.coulombel.it:20001` if define a CNAME mapping.
+
+As mentioned in section here: https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-a.md#configure-a-dynamic-dns
+
+This can be done in Gandi live DNS. Rather than define a DNS recoord we could also use a Gandi redirection to abstract the port.
+(not tested yet with vlc yet)
+
+We also tested succesfully this with our own DNS nameserver here (with it registrar) ! 
+https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-b.md#add-record-for-application-deployed-behind-the-box
+
+<!-- could use ddns with local client for local ip instead of 192.168.1.32 at home, and could also define a CNAME to that DDNS (not tested stop OK) -->
+
+#### TODO
+<!--only this actually link dns ok, todo dns ok AND (not tested yet with vlc yet) OPTIONAL -->
 - check data conso
 
 
