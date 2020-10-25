@@ -66,10 +66,12 @@ vlc	TCP	Port	20001	192.168.1.32
 
 ```
 # If on 3G (public IP)
+<box public ip> 109.29.148.109:20001
 <your DDNS Name>.ddns.net:20001
 ```
 
 This will work on LAN or not (when using 3G).
+However when on same LAN it is not performant as we go outside to come back inside.
 
 ## Get content 
 
@@ -178,20 +180,31 @@ Cf. https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns
 
 #### CNAME to DDNS (advanced)
 
-When we use dynamic DNS `scoulomb.ddns.net:20001`, we could use `home.coulombel.it:20001` if define a CNAME mapping.
+When we use dynamic DNS `scoulomb.ddns.net:20001`, Box public IP (109.x.y.z), laptop private IP (102.168.x.y) we could use `home.coulombel.it:20001` if define a CNAME/A mapping.
+As mentioned in section here: https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-b.md#add-record-for-application-deployed-behind-the-box
 
-As mentioned in section here: https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-a.md#configure-a-dynamic-dns
+In  the proposed approach it would enable a smart switch between public and private IP.
 
-This can be done in Gandi live DNS. Rather than define a DNS recoord we could also use a Gandi redirection to abstract the port.
+We tested successfully this with our own DNS nameserver here (with it registrar).
+
+To test switch occurred use `home.coulombel.it:20001`. Use NAT config: http://192.168.1.1/network/nat
+- Enable NAT when phone is on 4G, click on button with Antenna it will work
+- Disable NAT when phone is on 4G, click on button with Antenna (otherwise stream continue) it will not work
+=> it uses public IP
+- Keep Disable NAT when phone is on Wifi, click on button with Antenna (wait) it should continue to work unlike 4G.
+=> it uses private IP
+- Set NAT back (no need to test NAT anf private IP)
+=> tested OK
+
+This can be done in Gandi live DNS too.
+Rather than define a DNS record we could also use a Gandi redirection to abstract the port.
 (not tested yet with vlc yet)
 
-We also tested succesfully this with our own DNS nameserver here (with it registrar) ! 
-https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-b.md#add-record-for-application-deployed-behind-the-box
 
-<!-- could use ddns with local client for local ip instead of 192.168.1.32 at home, and could also define a CNAME to that DDNS (not tested stop OK) -->
+#### TODO/DONE
 
-#### TODO
-<!--only this actually link dns ok, todo dns ok AND (not tested yet with vlc yet) OPTIONAL -->
-- check data conso
-
+<!--(not tested yet with vlc yet) OPTIONAL -->
+- check data conso: 80 mb for 1.5 h of stream from Android
+- dockerize and run in kube: decided to not do
+- https://www.omgubuntu.co.uk/2018/02/vlc-3-0-chromecast-support-new-features
 
