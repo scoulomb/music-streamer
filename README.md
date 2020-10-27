@@ -9,14 +9,14 @@ This leads to 2 issues when we do not want to pay for premium option.
 
 Here we propose an alternative with VLC stream
 
+Pre-requisite of tha do is: https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-0.md
 
 ## Stream audio
 
-### Configure server 
+### Deploy VLC server
 
 - Get vlc
 - Configure the server
-
 
 
 ```
@@ -49,29 +49,84 @@ $ ip addr | grep eno1 | grep inet | awk {'print $2'}
 
 Note we can stream the content on Google home
 
-### Make your stream available publicly
+### Configure a reverse NAT
 
-Use-case: phone with 3G while not at home
+Use-case: phone with 4G while not at home
 
+Make your stream available publicly by configuring NAT in your box
 
-As a prerequisite you need to configure a Dynamic DNS.
-Procedure is described here: https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-a.md#configure-a-dynamic-dns
-
-- Configure NAT on your box
+It is in In http://192.168.1.1/network/nat
 
 ```
 vlc	TCP	Port	20001	192.168.1.32
 ```
-- Configure VLC stream on Android client
 
-```
-# If on 3G (public IP)
+Application is now available via public IP on the internet:
+
+```shell script
 <box public ip> 109.29.148.109:20001
-<your DDNS Name>.ddns.net:20001
 ```
 
-This will work on LAN or not (when using 3G).
-However when on same LAN it is not performant as we go outside to come back inside.
+### Use DNS configuration performed in prerequisite with a smart switch to avoid to go outside to come back inside when on same LAN
+
+Note we could use directly: `scoulomb.ddns.net`. but no switching and could use 2 DNS one private and one public-->
+
+
+#### Example using Gandi namserver
+
+We perform configuration here:
+https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-a.md#abstract-dynamic-dns-via-a-cname
+
+- with a CNAME in Gandi 
+
+````shell script
+home 300 IN CNAME scoulomb.ddns.net.
+````
+
+- And in SFR
+
+````shell script
+192.168.1.32	home.coulombel.it/site
+````
+
+
+
+#### Example with own nameserver
+
+We perform configuration here: 
+https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-b.md#achieve-with-our-own-dns-the-same-service-performed-by-gandi-for-application-deployed-in-section-part-a-to-abstract-dynamic-dns-name
+
+- with a CNAME in our nameserver accessible from NAT with IT registrar pointing to our nameserver.
+
+````shell script
+home 300 IN CNAME scoulomb.ddns.net.
+````
+
+- And in SFR
+
+````shell script
+192.168.1.32	home.coulombel.it/site
+````
+
+#### Tests
+
+We tested successfully this with our own DNS nameserver here (with registrar) using IT domain and Gandi live DNS using site domain.
+
+We used this protocol to test switch occurred use `home.coulombel.it/site:20001`. Use NAT config: http://192.168.1.1/network/nat
+- Enable NAT when phone is on 4G, click on button with Antenna it will work
+- Disable NAT when phone is on 4G, click on button with Antenna (otherwise stream continue) it will not work
+=> it uses public IP
+- Keep Disable NAT when phone is on Wifi, click on button with Antenna (wait) it should continue to work unlike 4G.
+=> it uses private IP
+- Set NAT back (no need to test NAT and private IP)
+=> tested OK
+
+
+Rather than define a DNS record we could also use a Gandi redirection to abstract the port.
+(not tested), but need external DNS  (so internet)
+
+
+
 
 ## Get content 
 
@@ -178,32 +233,8 @@ It could be started remotely via Jupyter or SSH (NAT again).
 Cf. https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-a.md
 
 
-#### CNAME to DDNS (advanced)
+#### Optional TODO/DONE
 
-When we use dynamic DNS `scoulomb.ddns.net:20001`, Box public IP (109.x.y.z), laptop private IP (102.168.x.y) we could use `home.coulombel.it:20001` if define a CNAME/A mapping.
-As mentioned in section here: https://github.com/scoulomb/myDNS/blob/master/2-advanced-bind/5-real-own-dns-application/6-use-linux-nameserver-part-b.md#add-record-for-application-deployed-behind-the-box
-
-In  the proposed approach it would enable a smart switch between public and private IP.
-
-We tested successfully this with our own DNS nameserver here (with it registrar).
-
-To test switch occurred use `home.coulombel.it:20001`. Use NAT config: http://192.168.1.1/network/nat
-- Enable NAT when phone is on 4G, click on button with Antenna it will work
-- Disable NAT when phone is on 4G, click on button with Antenna (otherwise stream continue) it will not work
-=> it uses public IP
-- Keep Disable NAT when phone is on Wifi, click on button with Antenna (wait) it should continue to work unlike 4G.
-=> it uses private IP
-- Set NAT back (no need to test NAT anf private IP)
-=> tested OK
-
-This can be done in Gandi live DNS too.
-Rather than define a DNS record we could also use a Gandi redirection to abstract the port.
-(not tested yet with vlc yet)
-
-
-#### TODO/DONE
-
-<!--(not tested yet with vlc yet) OPTIONAL -->
 - check data conso: 80 mb for 1.5 h of stream from Android
 - dockerize and run in kube: decided to not do
 - https://www.omgubuntu.co.uk/2018/02/vlc-3-0-chromecast-support-new-features
